@@ -91,7 +91,6 @@ Bool stack_isEmpty (const Stack *s);
  */
 Bool stack_isFull (const Stack *s);
 
-
 /**
  * @brief This function returns the size of the stack.
  *

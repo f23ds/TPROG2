@@ -24,39 +24,48 @@ char *string_invert(char *str)
   /* Es OBLIGATORIO usar una pila para implementar esta función */
   /* No hacerlo implica un NO APTO */
   Stack *s;
-  int len, i = 0;
-  char *strout = NULL, *tmp = NULL;
+  int len = strlen(str), i;
+  char *strout;
 
-  /* Comprobamos que el puntero str no es NULL */
-  if (str == NULL)
+  /* Comprobamos el puntero str */
+  if (!str)
     return NULL;
 
-  /* La cadena de entrada y de salida deben tener la misma longitud, así que reservamos memoria para esta */
-  len = strlen(str);
 
-  strout = (char *)malloc(len * sizeof(char));
+  /* Reservamos memoria para la cadena de salida */
+  strout = (char *)malloc((len + 1) * sizeof(char));
 
-  /* Introducimos los caracteres en la pila */
+  /* Comprobamos la reserva de memoria */
+  if (!strout)
+    return NULL;
+
+  /* Inicializamos una pila para guardar los caracteres de la cadena de entrada */
   s = stack_init();
 
-  if (s == NULL)
+  /* Comprobamos la pila */
+  if (!s)
     return NULL;
 
-  for (i = len+1; i >= 0; i--)
+  /* Guardamos los caracteres de la cadena de entrada en la pila uno por uno */
+  for (i = 0; i < len + 1; i++)
   {
-    stack_push(s, &str[i]);
+    if (str[i] != '\0')
+    {
+      stack_push(s, &str[i]);
+    }
   }
 
-  /* Ahora queremos introducir los caracteres que hemos almacenado en la pila en strout */
-  i = 0;
-  while (!stack_isEmpty(s)) {
-    tmp = (char *) stack_pop(s);
-    strcpy(&strout[i], tmp);
-  }
+  /* Ahora hacemos pop en la pila iterativamente hasta llenar la cadena de salida 
+  for (i = 0; i < len + 1; i++)
+  {
+    if (!stack_isEmpty(s))
+    {
+      strcpy(&strout[i], (char *)stack_pop(s));
+    }
+  } */
 
   stack_free(s);
-
-  return strout; // remove this line once you add your code
+  return str;
 }
 
 /**
