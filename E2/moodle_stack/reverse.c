@@ -24,7 +24,7 @@ int *_space_pos(char *strin, int num_spaces)
   len = strlen(strin);
 
   /* Guardamos memoria para las posiciones de los espacios dentro de la cadena */
-  space_pos = (int *)malloc((num_spaces + 1) * sizeof(int));
+  space_pos = (int *)calloc((num_spaces + 1), sizeof(int));
 
   /* Comprobamos la reserva de memoria */
   if (!space_pos)
@@ -87,7 +87,7 @@ char *string_invert(char *str)
   len = strlen(str);
 
   /* Reservamos memoria para la cadena de salida */
-  strout = (char *)malloc((len + 1) * sizeof(char));
+  strout = (char *)calloc((len + 1), sizeof(char));
 
   /* Comprobamos la reserva de memoria */
   if (!strout)
@@ -137,7 +137,7 @@ char *string_invert(char *str)
 
 Status reverseWords(char *strout, char *strin)
 {
-  Stack *s;
+  Stack *s = NULL;
   int i, j, flag = 0, len, *space_pos = NULL, num_spaces;
 
   /* Comprobamos los punteros */
