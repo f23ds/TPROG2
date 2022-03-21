@@ -1,0 +1,20 @@
+{
+      queue_push(aux1, queue_getFront(q));
+      queue_pop(q);
+    }
+
+    /* Insertamos la segunda mitad en aux2 */
+    for (i = 0; i < size / 2; i++)
+    {
+      queue_push(aux2, queue_getFront(q));
+      queue_pop(q);
+    }
+
+    /* Ahora insertamos los elementos en qinter en orden alternativo */
+    for (i = 0; i < size / 2; i++)
+    {
+      queue_push(qinter, queue_getFront(aux1));
+      queue_pop(aux1);
+      queue_push(qinter, queue_getFront(aux2));
+      queue_pop(aux2);
+    }

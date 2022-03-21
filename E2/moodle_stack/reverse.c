@@ -1,5 +1,6 @@
 #include "stack_fDoble.h"
 #include "file_utils.h"
+#include "types.h"
 /* Include here any other headers you need */
 #include <stdio.h>
 #include <stdlib.h>
@@ -13,59 +14,6 @@ struct _Stack
   int top;
 };
 
-int *_space_pos(char *strin, int num_spaces)
-{
-  int i, j, len, *space_pos = NULL;
-
-  /* Comprobamos strin */
-  if (!strin)
-    return NULL;
-
-  len = strlen(strin);
-
-  /* Guardamos memoria para las posiciones de los espacios dentro de la cadena */
-  space_pos = (int *)calloc((num_spaces + 1), sizeof(int));
-
-  /* Comprobamos la reserva de memoria */
-  if (!space_pos)
-    return NULL;
-
-  /* Iteramos sobre la cadena para saber la posición de los espacios y almacenarlas en el array */
-  for (i = 0, j = 0; i < len; i++)
-  {
-    if (strin[i] == ' ')
-    {
-      space_pos[j] = i;
-      j++;
-    }
-  }
-
-  space_pos[j] = i;
-
-  return space_pos;
-}
-
-int _num_spaces(const char *strin)
-{
-  int i, len, num_spaces = 0;
-
-  if (!strin)
-    return -1;
-
-  len = strlen(strin);
-
-  /* Iteramos sobre la cadena para saber el número de espacios de la cadena */
-  for (i = 0; i < len; i++)
-  {
-    if (strin[i] == ' ')
-    {
-      num_spaces++;
-    }
-  }
-
-  return num_spaces;
-}
-
 /**
  * @brief: Reverses a string
  * @param str, String to reverse
@@ -77,12 +25,13 @@ char *string_invert(char *str)
   /* Es OBLIGATORIO usar una pila para implementar esta función */
   /* No hacerlo implica un NO APTO */
   Stack *s = NULL;
-  int len, i;
+  int len, i = 0;
   char *strout = NULL;
+  Status status = OK;
 
   /* Comprobamos el puntero str */
   if (!str)
-    return NULL;
+    return ERROR;
 
   len = strlen(str);
 
@@ -91,7 +40,7 @@ char *string_invert(char *str)
 
   /* Comprobamos la reserva de memoria */
   if (!strout)
-    return NULL;
+    return ERROR;
 
   /* Inicializamos una pila para guardar los caracteres de la cadena de entrada */
   s = stack_init();
@@ -100,24 +49,34 @@ char *string_invert(char *str)
   if (!s)
   {
     free(strout);
-    return NULL;
+    return ERROR;
   }
 
   /* Guardamos los caracteres de la cadena de entrada en la pila uno por uno */
-  for (i = 0; i < len; i++)
+  while ((str[i] != '\0') && status == OK)
   {
-    stack_push(s, &str[i]);
+    status = stack_push(s, &str[i]);
+    i++;
   }
 
+  /* Evaluamos status al final del bucle while */
+  if (status == ERROR)
+  {
+    char_free(strout);
+    stack_free(s);
+    return ERROR;
+  }
+
+  i = 0;
   /* Ahora hacemos pop en la pila iterativamente hasta llenar la cadena de salida */
-  for (i = 0; i < len; i++)
+  while (!stack_isEmpty(s))
   {
-    if (!stack_isEmpty(s))
-    {
-      strout[i] = (*(char *)stack_pop(s));
-    }
+    strout[i] = (*(char *)stack_pop(s));
+    i++;
   }
 
+  /* El último caracter siempre tiene que ser el \0 */
+  strout[len] = '\0';
   stack_free(s);
   return strout;
 }
@@ -138,76 +97,51 @@ char *string_invert(char *str)
 Status reverseWords(char *strout, char *strin)
 {
   Stack *s = NULL;
-  int i, j, flag = 0, len, *space_pos = NULL, num_spaces;
+  int i = 0, j = 0;
+  Status status = OK;
 
   /* Comprobamos los punteros */
   if (strin == NULL || strout == NULL)
     return ERROR;
-
-  len = strlen(strin);
 
   s = stack_init();
 
   if (!s)
     return ERROR;
 
-  /* Extraemos el número de espacios de la cadena */
-  num_spaces = _num_spaces(strin);
-
-  /* Extraemos el array con las posiciones de los espacios */
-  space_pos = _space_pos(strin, num_spaces);
-
-  if (num_spaces == 0)
+  while (status == OK && strin[i] != '\0')
   {
-    /* Guardamos los caracteres de la cadena de entrada en la pila uno por uno */
-    for (i = 0; i < len; i++)
-    {
-      stack_push(s, &strin[i]);
-    }
-
-    /* Ahora hacemos pop en la pila iterativamente hasta llenar la cadena de salida */
-    for (i = 0; i < len; i++)
-    {
-      if (!stack_isEmpty(s))
-      {
-        strout[i] = (*(char *)stack_pop(s));
+    /* Si el caracter no es un espacio lo introducimos en la pila */
+    if (strin[i] != ' ') {
+      status = stack_push(s, &strin[i]);
+      i++;
+    } else { /* al haber encontrado un espacio debemos reversear la palabra */
+      while (stack_isEmpty(s) == FALSE) {
+        strout[j] = (*(char *) stack_pop(s));
+        j++;
       }
+      /* Añadimos el espacio en la última posición */
+      strout[j] = ' ';
+      i++;
+      j++;
     }
   }
-  else if (num_spaces != -1)
-  {
-    flag = 0;
-    /* Ahora introducimos cada palabra en la pila e invertimos */
-    for (i = 0; i < num_spaces + 1; i++)
-    {
-      /* Introducimmos palabra */
-      for (j = flag; j < space_pos[i]; j++)
-      {
-        stack_push(s, &strin[j]);
-      }
 
-      /* Invertimos */
-      for (j = flag; j < space_pos[i]; j++)
-      {
-        if (!stack_isEmpty(s))
-        {
-          strout[j] = *(char *)stack_pop(s);
-        }
-      }
-
-      flag = space_pos[i] + 1;
-
-      /* Añadimos el espacio a la cadena */
-      stack_push(s, &strin[space_pos[i]]);
-      strout[j] = *(char *)stack_pop(s);
-    }
-  } else {
+  /* Realizamos el control de errores */
+  if (status == ERROR) {
+    stack_free(s);
     return ERROR;
   }
 
-  /* Frees */
+  /* Vacíamos la pila con la última palabra */
+  while (stack_isEmpty(s) == FALSE) {
+    strout[j] = (*(char *) stack_pop(s));
+    j++;
+  }
+
+  /* El último caracter debe ser cero */
+  strout[j] = '\0';
   stack_free(s);
-  free(space_pos);
 
   return OK;
 }

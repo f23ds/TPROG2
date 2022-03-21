@@ -36,7 +36,7 @@ void test_string(char *str, char *res1, char *res2) {
   }
 
   // reverse each of the words of the string, and output them in reverse order
-  strwords = calloc((strlen(str) + 1), sizeof(char));
+  strwords = malloc((strlen(str) + 1) * sizeof(char));
   if (strwords && reverseWords(strwords, str) == OK) {
     printf("Reversed words: [%s]\n", strwords);
     test_report(strwords, res2);
