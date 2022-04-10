@@ -110,27 +110,74 @@ Queue *interleave(Queue *q)
  **/
 Status concatenate(Queue *qa, Queue *qb)
 {
-  size_t size1, size2;
-  int i, j;
+  size_t size1;
+  int i;
+  Queue *aux1 = NULL, *aux2 = NULL;
+  Status st = OK;
+  void *ele;
 
   if (!qa || !qb)
     return ERROR;
 
   size1 = queue_size(qa);
-  size2 = queue_size(qb);
 
-  for (i = size1; i < size1 + size2; i++)
+  while (queue_isEmpty(qb) == FALSE && st == OK)
   {
-    if (queue_push(qa, queue_getFront(qb)) == ERROR)
+    ele = queue_pop(qb);
+    st = queue_push(qa, ele);
+  }
+
+  if (st == ERROR)
+  {
+    /* Usamos dos colas auxiliares para hacer el restore de qa y qb */
+    aux1 = queue_new();
+    aux2 = queue_new();
+
+    /* Introducimos el elemento conflictivo en la segunda cola auxiliar */
+    queue_push(aux2, ele);
+
+    /* Extraemos los elementos originales de qa y los introducimos en la primera cola auxiliar */
+    for (i = 0; i < size1; i++)
     {
-      /* Si falla debemos returnear las colas a sus valores por defecto */
-      queue_push(qb, queue_getBack(qa));
-      queue_pop(qa);
+      ele = queue_pop(qa);
+      queue_push(aux1, ele);
     }
-    else
+
+    /* Vaciamos la cola de qa, que son los elementos pusheados de qb, en la segunda cola auxiliar */
+    while (queue_isEmpty(qa) == FALSE)
     {
-      queue_pop(qb);
+      ele = queue_pop(qa);
+      queue_push(aux2, ele);
     }
+
+    /* Vaciamos la cola de qb también en la segunda cola auxiliar */
+    while (queue_isEmpty(qb) == FALSE)
+    {
+      ele = queue_pop(qb);
+      queue_push(aux2, ele);
+    }
+
+    /* Ahora devolvemos a qa sus elementos iniciales */
+    while (queue_isEmpty(aux1) == FALSE)
+    {
+      ele = queue_pop(aux1);
+      queue_push(qa, ele);
+    }
+
+    /* Lo mismo con qb */
+    while (queue_isEmpty(aux2) == FALSE)
+    {
+      ele = queue_pop(aux2);
+      queue_push(qb, ele);
+    }
+
+    ele = queue_pop(qb);
+    queue_push(qb, ele);
+
+    /* Liberamos memoria de las colas auxiliares */
+    queue_free(aux1);
+    queue_free(aux2);
+    return ERROR;
   }
 
   return OK;

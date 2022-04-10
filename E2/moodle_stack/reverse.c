@@ -139,7 +139,7 @@ Status reverseWords(char *strout, char *strin)
     j++;
   }
 
-  /* El último caracter debe ser cero */
+  /* El último caracter debe ser \0 */
   strout[j] = '\0';
   stack_free(s);
 
